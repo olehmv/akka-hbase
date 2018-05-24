@@ -20,14 +20,15 @@ object Main {
     val source: PersonSource = new PersonSource(
       HTableSettings(HBaseConfiguration.create(),
                      TableName.valueOf("person"),
-                     immutable.Seq("info"),
-                     immutable.Seq("name")),new Person("id_1","zozo_1"))
+                     immutable.Map("info"->immutable.Seq("name"))),new Person("id_9","zozo_9"))
 
     val value: Source[Person, NotUsed] = Source.fromGraph(source)
 
-        Source.fromGraph(source).take(1).runForeach(println)
+    val sink: PersonSink = new PersonSink(HTableSettings(HBaseConfiguration.create(),TableName.valueOf("person01"),immutable.Map("info"->immutable.Seq("name"))),new Person("1","igor"))
 
+    Source.fromGraph(source).take(1).runForeach(println)
 
+    val f = Source(1 to 10).map(i => Person(i.toString, s"zozo_$i")).runWith(sink)
   }
 
   //  val tableSettings =
@@ -37,7 +38,7 @@ object Main {
 
   //    val sink = HTableStage.sink[Person](tableSettings)
   //
-  //    val f = Source(1 to 10).map(i => Person(i, s"zozo_$i")).runWith(sink)
+//      val f = Source(1 to 10).map(i => Person(i, s"zozo_$i")).runWith(sink)
 
 
 //  implicit def toBytes(string: String): Array[Byte] = Bytes.toBytes(string)

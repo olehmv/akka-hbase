@@ -11,11 +11,15 @@ libraryDependencies ++= Seq(
   "com.lightbend.akka" %% "akka-stream-alpakka-hbase" % "0.19",
   // https://mvnrepository.com/artifact/log4j/log4j
   // https://mvnrepository.com/artifact/com.typesafe.akka/akka-stream
- // "com.typesafe.akka" %% "akka-stream" % "2.5.11",
+  // "com.typesafe.akka" %% "akka-stream" % "2.5.11",
   // https://mvnrepository.com/artifact/org.scala-lang/scala-reflect
   "org.scala-lang" % "scala-reflect" % "2.11.1",
-
-"log4j" % "log4j" % "1.2.17",
+  "log4j" % "log4j" % "1.2.17",
   // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
-  "org.slf4j" % "slf4j-simple" % "1.7.25"
+  "org.slf4j" % "slf4j-simple" % "1.7.25",
+  // https://mvnrepository.com/artifact/com.flipkart/hbase-object-mapper
+  "com.flipkart" % "hbase-object-mapper" % "1.3",
+  // https://mvnrepository.com/artifact/org.projectlombok/lombok
+"org.projectlombok" % "lombok" % "1.16.20" % "provided"
+
 )

@@ -23,7 +23,7 @@ class PersonSource(settings: HTableSettings[Person],person: Person) extends Grap
 
       implicit val connection: Connection = connect(settings.conf)
 
-      private val table: Table = getOrCreateTable(settings.tableName,settings.columnFamilies)
+      private val table: Table = getOrCreateTable(settings.tableName,settings.mapOfColumnFamileAndSeqColumns.keys.toSeq)
 
       implicit def stringToBytes(string: String): Array[Byte] = Bytes.toBytes(string)
 
@@ -35,10 +35,15 @@ class PersonSource(settings: HTableSettings[Person],person: Person) extends Grap
       val getPerson= {
         import org.apache.hadoop.hbase.util.Bytes
         val get = new Get(Bytes.toBytes(person.id))
-        get.setMaxVersions(3)
-        settings.columnFamilies.foreach(c=>get.addFamily(c))
+//        get.setMaxVersions(3)
+        settings.mapOfColumnFamileAndSeqColumns match {
+          case map:  Map[String, scala.Seq[String]] => map.keys.foreach(family=>map(family).foreach(coulmn=>get.addColumn(family,coulmn)))
+
+        }
         val result: Result = table.get(get)
-        val value = result.getValue(settings.columnFamilies(0),settings.columns(0))
+        val family:String = settings.mapOfColumnFamileAndSeqColumns.keys.toList(0)
+        val column:String = settings.mapOfColumnFamileAndSeqColumns(family)(0)
+        val value:String = result.getValue(family,column)
         Person(get.getRow,value)
       }
 

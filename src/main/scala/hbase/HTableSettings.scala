@@ -8,5 +8,4 @@ import scala.collection.immutable
 
 case class HTableSettings[T](conf: Configuration,
                              tableName: TableName,
-                             columnFamilies: immutable.Seq[String],
-                             columns: immutable.Seq[String])
+                             mapOfColumnFamileAndSeqColumns: immutable.Map[String,Seq[String]])
