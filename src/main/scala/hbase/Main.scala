@@ -2,7 +2,7 @@ package hbase
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.{ActorMaterializer, Attributes}
 import akka.stream.alpakka.hbase.scaladsl.HTableStage
 import akka.stream.scaladsl.{Sink, Source}
 import org.apache.hadoop.conf.Configuration
@@ -17,37 +17,23 @@ object Main {
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
 
-    val source: PersonSource = new PersonSource(
-      HTableSettings(HBaseConfiguration.create(),
-                     TableName.valueOf("person"),
-                     immutable.Map("info"->immutable.Seq("name"))),new Person("id_9","zozo_9"))
 
-    val value: Source[Person, NotUsed] = Source.fromGraph(source)
+//    val value: Source[Person, NotUsed] = Source.fromGraph(source)
+//    Source.fromGraph(source).take(1).runForeach(println)
+//
+//    val sink:PersonSink=new PersonSink(HTableSettings(HBaseConfiguration.create(),TableName.valueOf("person")))
+//
+//    val f = Source(11 to 20).map(i => new Person(i.toString, s"zozo_$i")).runWith(sink)
 
-    val sink: PersonSink = new PersonSink(HTableSettings(HBaseConfiguration.create(),TableName.valueOf("person01"),immutable.Map("info"->immutable.Seq("name"))),new Person("1","igor"))
+//   val sink : CarSink = new CarSink(HTableSettings(HBaseConfiguration.create(),
+//      TableName.valueOf("car")))
+//
+//    val f = Source(1 to 10).map(i =>new Car(i.toString, s"zozo_$i")).runWith(sink)
 
+    val source = new PersonSource(HTableSettings(HBaseConfiguration.create(),TableName.valueOf("person")),new Person(1.toString,"zozo_1"))
     Source.fromGraph(source).take(1).runForeach(println)
 
-    val f = Source(1 to 10).map(i => Person(i.toString, s"zozo_$i")).runWith(sink)
   }
 
-  //  val tableSettings =
-  //    HTableSettings(HBaseConfiguration.create(), TableName.valueOf("person"), immutable.Seq("info"), hBaseConverter)
-
-  //    val f = Source(20 to 30).map(i => Person(i, s"zozo_$i")).via(flow).runWith(Sink.fold(0)((a, d) => a + d.id))
-
-  //    val sink = HTableStage.sink[Person](tableSettings)
-  //
-//      val f = Source(1 to 10).map(i => Person(i, s"zozo_$i")).runWith(sink)
-
-
-//  implicit def toBytes(string: String): Array[Byte] = Bytes.toBytes(string)
-
-//
-//  val hBaseConverter: Person => Put = { person =>
-//    val put = new Put(s"id_${person.id}")
-//    put.addColumn("info", "name", person.name)
-//    put
-//  }
 
 }

@@ -4,12 +4,16 @@ import java.util.function
 
 import akka.stream.{Attributes, Outlet, SourceShape}
 import akka.stream.stage.{GraphStage, GraphStageLogic, OutHandler}
+import com.flipkart.hbaseobjectmapper.HBObjectMapper
+import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
 
+import scala.collection.mutable
 import scala.reflect.runtime.universe
 
-class PersonSource(settings: HTableSettings[Person],person: Person) extends GraphStage[SourceShape[Person]]  {
+class PersonSource(settings: HTableSettings,person: Person) extends GraphStage[SourceShape[Person]]  {
   val out: Outlet[Person] = Outlet("PersonSource")
   override val shape: SourceShape[Person] = SourceShape(out)
 
@@ -21,38 +25,27 @@ class PersonSource(settings: HTableSettings[Person],person: Person) extends Grap
       // callbacks that are provided by GraphStageLogic and the
       // registered handlers.
 
+      import collection.JavaConverters._
+
+      val hbObjectMapper: HBObjectMapper = new HBObjectMapper
+
+      val families: mutable.Set[String] = hbObjectMapper.getColumnFamilies(classOf[Car]).asScala
+
+      val name: TableName = settings.tableName
+
       implicit val connection: Connection = connect(settings.conf)
 
-      private val table: Table = getOrCreateTable(settings.tableName,settings.mapOfColumnFamileAndSeqColumns.keys.toSeq)
-
-      implicit def stringToBytes(string: String): Array[Byte] = Bytes.toBytes(string)
-
-//      implicit def bytesToInt(bytes: Array[Byte] ):Int = Bytes.toInt(bytes)
-
-      implicit def bytesToString(bytes: Array[Byte] ):String =Bytes.toString(bytes)
-
-
-      val getPerson= {
-        import org.apache.hadoop.hbase.util.Bytes
-        val get = new Get(Bytes.toBytes(person.id))
-//        get.setMaxVersions(3)
-        settings.mapOfColumnFamileAndSeqColumns match {
-          case map:  Map[String, scala.Seq[String]] => map.keys.foreach(family=>map(family).foreach(coulmn=>get.addColumn(family,coulmn)))
-
-        }
-        val result: Result = table.get(get)
-        val family:String = settings.mapOfColumnFamileAndSeqColumns.keys.toList(0)
-        val column:String = settings.mapOfColumnFamileAndSeqColumns(family)(0)
-        val value:String = result.getValue(family,column)
-        Person(get.getRow,value)
-      }
+      private val table: Table = getOrCreateTable(name,families)
 
 
       setHandler(
         out,
         new OutHandler {
           override def onPull(): Unit = {
-            push(out, getPerson)
+            val writable: ImmutableBytesWritable = hbObjectMapper.getRowKey(person)
+            val put = hbObjectMapper.writeValueAsPut(person)
+            val result: Person = hbObjectMapper.readValue(writable,put,classOf[Person])
+            push(out, result)
           }
         }
       )

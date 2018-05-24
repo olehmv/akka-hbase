@@ -6,6 +6,5 @@ import org.apache.hadoop.hbase.client.{Scan, Row}
 
 import scala.collection.immutable
 
-case class HTableSettings[T](conf: Configuration,
-                             tableName: TableName,
-                             mapOfColumnFamileAndSeqColumns: immutable.Map[String,Seq[String]])
+case class HTableSettings(conf: Configuration,
+                             tableName: TableName)
