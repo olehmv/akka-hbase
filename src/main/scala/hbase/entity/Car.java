@@ -1,10 +1,9 @@
-package hbase;
+package hbase.entity;
 
 import com.flipkart.hbaseobjectmapper.HBColumn;
+import com.flipkart.hbaseobjectmapper.HBRecord;
+import com.flipkart.hbaseobjectmapper.HBRowKey;
 import com.flipkart.hbaseobjectmapper.HBTable;
-import com.flipkart.hbaseobjectmapper.*;
-import com.flipkart.hbaseobjectmapper.codec.*;
-
 @HBTable("car")
 public class Car implements HBRecord{
     @HBRowKey

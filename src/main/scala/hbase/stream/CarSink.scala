@@ -1,37 +1,30 @@
-package hbase
+package hbase.stream
 
-import java.lang.reflect.Field
-import java.util
-
-import akka.stream.{Attributes, Inlet, SinkShape}
 import akka.stream.stage.{GraphStage, GraphStageLogic, InHandler}
+import akka.stream.{Attributes, Inlet, SinkShape}
 import com.flipkart.hbaseobjectmapper.HBObjectMapper
+import hbase.connection.HBaseConnection
+import hbase.entity.Car
+import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.TableName
-import org.apache.hadoop.hbase.client.{Connection, HTable, Put, Table}
-import org.apache.hadoop.hbase.util.Bytes
 
 import scala.collection.mutable
 
-class CarSink(settings: HTableSettings) extends GraphStage[SinkShape[Car]] {
+class CarSink(configutation: Configuration,tableName: TableName) extends GraphStage[SinkShape[Car]] {
   val in: Inlet[Car] = Inlet("AvtoSink")
   override val shape: SinkShape[Car] = SinkShape(in)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
-    new GraphStageLogic(shape)with HBaseConnection {
+    new GraphStageLogic(shape) with HBaseConnection {
+      implicit val connection = connect(configutation)
       import collection.JavaConverters._
 
       val hbObjectMapper: HBObjectMapper = new HBObjectMapper
-
       val families: mutable.Set[String] = hbObjectMapper.getColumnFamilies(classOf[Car]).asScala
+      val table = getOrCreateTable(tableName,families)
 
-      val name: TableName = settings.tableName
-
-      implicit val connection: Connection = connect(settings.conf)
-
-      private val table: Table = getOrCreateTable(name,families)
 
       override def preStart(): Unit = pull(in)
-
 
       setHandler(
         in,
@@ -41,7 +34,6 @@ class CarSink(settings: HTableSettings) extends GraphStage[SinkShape[Car]] {
             val put = hbObjectMapper.writeValueAsPut(car)
             table.put(put)
             pull(in)
-
           }
         }
       )

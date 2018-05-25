@@ -1,14 +1,13 @@
-package hbase
+package hbase.connection
 
 import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
-import org.apache.hadoop.hbase.client.{Admin, Connection, ConnectionFactory, Get, Table}
 
 import scala.collection.mutable
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
-
 
 trait HBaseConnection {
 

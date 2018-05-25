@@ -1,21 +1,22 @@
-package hbase
+package hbase.stream
 
-import java.util.function
-
-import akka.stream.{Attributes, Outlet, SourceShape}
 import akka.stream.stage.{GraphStage, GraphStageLogic, OutHandler}
+import akka.stream.{ActorAttributes, Attributes, Outlet, SourceShape}
 import com.flipkart.hbaseobjectmapper.HBObjectMapper
+import hbase.connection.HBaseConnection
+import hbase.entity.Car
+import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.TableName
-import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.hbase.util.Bytes
 
 import scala.collection.mutable
-import scala.reflect.runtime.universe
 
-class PersonSource(settings: HTableSettings,person: Person) extends GraphStage[SourceShape[Person]]  {
-  val out: Outlet[Person] = Outlet("PersonSource")
-  override val shape: SourceShape[Person] = SourceShape(out)
+class CarSource(configutation: Configuration, tableName: TableName, car: Car) extends GraphStage[SourceShape[Car]]  {
+  override protected def initialAttributes: Attributes =
+    Attributes.name("HBaseFLow").and(ActorAttributes.dispatcher("akka.stream.default-blocking-io-dispatcher"))
+
+  val out: Outlet[Car] = Outlet("CarSource")
+  override val shape: SourceShape[Car] = SourceShape(out)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
     new GraphStageLogic(shape) with HBaseConnection {
@@ -24,27 +25,24 @@ class PersonSource(settings: HTableSettings,person: Person) extends GraphStage[S
       // This state is safe to access and modify from all the
       // callbacks that are provided by GraphStageLogic and the
       // registered handlers.
+      implicit val connection = connect(configutation)
 
       import collection.JavaConverters._
 
       val hbObjectMapper: HBObjectMapper = new HBObjectMapper
-
       val families: mutable.Set[String] = hbObjectMapper.getColumnFamilies(classOf[Car]).asScala
 
-      val name: TableName = settings.tableName
 
-      implicit val connection: Connection = connect(settings.conf)
-
-      private val table: Table = getOrCreateTable(name,families)
+      val table = getOrCreateTable(tableName,families)
 
 
       setHandler(
         out,
         new OutHandler {
           override def onPull(): Unit = {
-            val writable: ImmutableBytesWritable = hbObjectMapper.getRowKey(person)
-            val put = hbObjectMapper.writeValueAsPut(person)
-            val result: Person = hbObjectMapper.readValue(writable,put,classOf[Person])
+            val writable: ImmutableBytesWritable = hbObjectMapper.getRowKey(car)
+            val put = hbObjectMapper.writeValueAsPut(car)
+            val result: Car = hbObjectMapper.readValue(writable,put,classOf[Car])
             push(out, result)
           }
         }
