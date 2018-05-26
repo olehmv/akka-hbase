@@ -39,6 +39,7 @@ class PersonSink(configutation: Configuration,tableName: TableName) extends Grap
             val person = grab(in)
             val put: Put = hbObjectMapper.writeValueAsPut(person)
             table.put(put)
+            table.close()
             pull(in)
 
           }

@@ -12,6 +12,7 @@ import scala.collection.mutable
 
 class CarSink(configutation: Configuration,tableName: TableName) extends GraphStage[SinkShape[Car]] {
   val in: Inlet[Car] = Inlet("AvtoSink")
+
   override val shape: SinkShape[Car] = SinkShape(in)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
@@ -33,6 +34,7 @@ class CarSink(configutation: Configuration,tableName: TableName) extends GraphSt
             val car: Car = grab(in)
             val put = hbObjectMapper.writeValueAsPut(car)
             table.put(put)
+            table.close()
             pull(in)
           }
         }

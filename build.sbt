@@ -23,5 +23,12 @@ libraryDependencies ++= Seq(
 
   "org.slf4j" % "slf4j-simple" % "1.7.25",
 
-  "com.flipkart" % "hbase-object-mapper" % "1.3"
+  "com.flipkart" % "hbase-object-mapper" % "1.3",
+
+  // Add dependency on ScalaFX library
+  "org.scalafx" %% "scalafx" % "8.0.144-R12"
 )
+
+// Add dependency on JavaFX library based on JAVA_HOME variable
+unmanagedJars in Compile += Attributed.blank(file(System.getenv("JAVA_HOME") + "/jre/lib/jfxrt.jar"))
+
