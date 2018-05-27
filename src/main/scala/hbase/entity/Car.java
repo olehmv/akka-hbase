@@ -1,48 +1,72 @@
 package hbase.entity;
-
+import javax.imageio.ImageIO;
 import com.flipkart.hbaseobjectmapper.HBColumn;
 import com.flipkart.hbaseobjectmapper.HBRecord;
 import com.flipkart.hbaseobjectmapper.HBRowKey;
 import com.flipkart.hbaseobjectmapper.HBTable;
+
+import java.io.File;
+import java.lang.reflect.Array;
+import java.util.List;
+import java.util.Map;
+
 @HBTable("car")
-public class Car implements HBRecord{
+public class Car implements HBRecord {
     @HBRowKey
-    private String aid;
-    @HBColumn(family = "info",column = "name")
-    private String name;
+    private String brand;
+    @HBColumn(family = "info",column = "model")
+    private String model;
+    @HBColumn(family = "info", column="type")
+    private String type;
+    @HBColumn(family = "image",column="foto")
+    private Map<String,byte[]> fotos;
 
     public Car(){
-
+    }
+    public Car(String brand, String model){
+        this.brand =brand;
+        this.model =model;
     }
 
-    public Car(String aid, String name){
-        this.aid=aid;
-        this.name=name;
+    public Map<String, byte[]> getFotos() {
+        return fotos;
     }
 
-    public String getAid() {
-        return aid;
+    public void setFotos(Map<String, byte[]> fotos) {
+        this.fotos = fotos;
     }
 
-    public void setAid(String aid) {
-        this.aid = aid;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getName() {
-        return name;
+    public String getType() {
+        return type;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
     }
 
     @Override
     public String composeRowKey() {
-        return aid;
+        return brand;
     }
 
     @Override
     public void parseRowKey(String rowKey) {
-            this.aid=rowKey;
+            this.brand =rowKey;
     }
 }

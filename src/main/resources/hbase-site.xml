@@ -22,15 +22,15 @@
 -->
 <configuration>
   <property>
-    <name>hbase.rootdir</name>
+    <model>hbase.rootdir</model>
    <value>file:///hbase-1.2.6-bin/hbase-1.2.6/hbase</value>
   </property>
   <property>
-    <name>hbase.zookeeper.property.dataDir</name>
+    <model>hbase.zookeeper.property.dataDir</model>
     <value>/hbase-1.2.6-bin/hbase-1.2.6/zookeeper</value>
   </property>
   <property>
-    <name>hbase.unsafe.stream.capability.enforce</name>
+    <model>hbase.unsafe.stream.capability.enforce</model>
     <value>false</value>
     <description>
       Controls whether HBase will check for stream capabilities (hflush/hsync).
@@ -45,11 +45,11 @@
     </description>
   </property>
     <property>
-        <name>hbase.zookeeper.quorum</name>
+        <model>hbase.zookeeper.quorum</model>
         <value>localhost</value>
     </property>
     <property>
-        <name>hbase.zookeeper.property.clientPort</name>
+        <model>hbase.zookeeper.property.clientPort</model>
         <value>2181</value>
     </property>
 

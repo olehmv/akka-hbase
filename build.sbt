@@ -11,6 +11,13 @@ val akkaVersion = "2.5.12"
 libraryDependencies ++= Seq(
   "com.lightbend.akka" %% "akka-stream-alpakka-hbase" % "0.19",
 
+  "com.typesafe.akka" %% "akka-http-core"  % "2.4.11",
+
+  "com.typesafe.akka" %% "akka-http-experimental"  % "2.4.11",
+
+  "com.typesafe.akka" %% "akka-http-spray-json-experimental"  % "2.4.11",
+
+
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
 
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
