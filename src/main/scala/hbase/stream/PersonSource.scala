@@ -11,7 +11,7 @@ import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 
 import scala.collection.mutable
 
-class PersonSource(configutation: Configuration,tableName: TableName,person: Person) extends GraphStage[SourceShape[Person]]  {
+class PersonSource (configutation: Configuration,tableName: TableName,person: Person) extends GraphStage[SourceShape[Person]]  {
   override protected def initialAttributes: Attributes =
     Attributes.name("HBaseFLow").and(ActorAttributes.dispatcher("akka.stream.default-blocking-io-dispatcher"))
 

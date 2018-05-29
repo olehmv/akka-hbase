@@ -8,15 +8,10 @@ scalaVersion := "2.11.1"
 
 val akkaVersion = "2.5.12"
 
+val akkaHttpVersion = "10.0.13"
+
 libraryDependencies ++= Seq(
   "com.lightbend.akka" %% "akka-stream-alpakka-hbase" % "0.19",
-
-  "com.typesafe.akka" %% "akka-http-core"  % "2.4.11",
-
-  "com.typesafe.akka" %% "akka-http-experimental"  % "2.4.11",
-
-  "com.typesafe.akka" %% "akka-http-spray-json-experimental"  % "2.4.11",
-
 
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
 
@@ -33,7 +28,12 @@ libraryDependencies ++= Seq(
   "com.flipkart" % "hbase-object-mapper" % "1.3",
 
   // Add dependency on ScalaFX library
-  "org.scalafx" %% "scalafx" % "8.0.144-R12"
+  "org.scalafx" %% "scalafx" % "8.0.144-R12",
+
+  "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+
+  "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
+
 )
 
 // Add dependency on JavaFX library based on JAVA_HOME variable
