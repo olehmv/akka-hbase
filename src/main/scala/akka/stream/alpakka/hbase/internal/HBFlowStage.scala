@@ -2,13 +2,14 @@ package akka.stream.alpakka.hbase.internal
 
 import akka.stream._
 import akka.stream.stage._
-import org.apache.hadoop.hbase.client.Table
+import org.apache.hadoop.hbase.client.{Result, Table}
+import org.apache.hadoop.hbase.util.Bytes
 
 import scala.util.control.NonFatal
 
 class HBFlowStage[A](
     settings: akka.stream.alpakka.hbase.internal.HTableSettings[A])
-    extends GraphStage[FlowShape[A, A]] {
+    extends GraphStage[FlowShape[A,Result]] {
 
   override protected def initialAttributes: Attributes =
     Attributes
@@ -18,7 +19,7 @@ class HBFlowStage[A](
           "akka.stream.default-blocking-io-dispatcher"))
 
   private val in = Inlet[A]("messages")
-  private val out = Outlet[A]("result")
+  private val out = Outlet[Result]("result")
 
   override val shape = FlowShape(in, out)
 
@@ -36,12 +37,17 @@ class HBFlowStage[A](
 
       setHandler(out, new OutHandler {
         override def onPull() = {
-
+              pull(in)
         }
       })
 
       setHandler(in, new InHandler {
         override def onPush(): Unit = {
+          val a = grab(in)
+          val get = settings.converter(a)
+          val result = table.get(get)
+          val str = Bytes.toString(result.value())
+          push(out,result)
 
         }
       })
