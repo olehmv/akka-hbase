@@ -6,6 +6,6 @@ import spray.json.DefaultJsonProtocol
 
 trait Marshalling extends DefaultJsonProtocol with SprayJsonSupport{
 
-  implicit val personFormat = jsonFormat2(Person)
+  implicit val personFormat = jsonFormat2(Person.apply)
 
 }
