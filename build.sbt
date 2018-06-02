@@ -11,7 +11,13 @@ val akkaVersion = "2.5.12"
 val akkaHttpVersion = "10.0.13"
 
 libraryDependencies ++= Seq(
+  "eu.bitwalker" % "UserAgentUtils" % "1.14",
+
   "com.lightbend.akka" %% "akka-stream-alpakka-hbase" % "0.19",
+
+  "com.lightbend.akka" %% "akka-stream-alpakka-slick" % "0.19",
+
+  "com.typesafe" % "config" % "1.3.2",
 
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
 
@@ -34,7 +40,12 @@ libraryDependencies ++= Seq(
 
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
 
-  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion
+  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion,
+
+  "org.apache.phoenix" % "phoenix-core" % "4.6.0-HBase-1.1" excludeAll
+    ExclusionRule(organization = "sqlline"),
+
+  "org.apache.hbase" % "hbase-server" % "1.1.2"
 
 )
 
