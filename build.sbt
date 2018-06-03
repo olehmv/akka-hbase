@@ -11,6 +11,9 @@ val akkaVersion = "2.5.12"
 val akkaHttpVersion = "10.0.13"
 
 libraryDependencies ++= Seq(
+
+  "org.scalikejdbc"    %% "scalikejdbc"     % "2.2.4",
+
   "eu.bitwalker" % "UserAgentUtils" % "1.14",
 
   "com.lightbend.akka" %% "akka-stream-alpakka-hbase" % "0.19",

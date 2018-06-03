@@ -1,14 +1,17 @@
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
+
+import proxy.dto.Request
+
 import scala.util.{Failure, Success, Try}
 
-package object phoenix {
+package object proxy {
 
   def getTimestamp(s: String): Option[Timestamp] = s match {
     case "" => None
     case _ => {
-      val format = new SimpleDateFormat("dd/MM/yyyy:HH:mm:ssZ")
+      val format = new SimpleDateFormat("yyyyy-MM-dd'T'HH:mm:ss")
       Try(new Timestamp(format.parse(s).getTime)) match {
         case Success(t) => Some(t)
         case Failure(_) => None
@@ -28,13 +31,12 @@ package object phoenix {
       * @throws IllegalArgumentException
       */
     @throws[IllegalArgumentException]
-    def parseApacheLog(line: String): Log = {
+    def parseRequest(line: String): Request = {
       val matcher = PATTERN.matcher(line)
       if (!matcher.matches) throw new IllegalArgumentException
-      new Log(matcher.group(1), matcher.group(4), matcher.group(5), matcher.group(6), matcher.group(7), matcher.group(9))
+      new Request(matcher.group(1).toInt, getTimestamp(matcher.group(4)).get,Option(matcher.group(5)), Option(matcher.group(6)),Option(matcher.group(7)))
     }
 
   }
-  case class Log(idAddress: String,dataTime:String,request:String,response:String,byteSent:String,browser:String)
 
 }

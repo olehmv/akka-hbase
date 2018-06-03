@@ -6,13 +6,15 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.slick.scaladsl._
-import akka.stream.scaladsl._
+import akka.stream.scaladsl.{Sink, Source}
+import com.typesafe.config.Config
 import eu.bitwalker.useragentutils.UserAgent
+import javax.security.auth.login.Configuration
 import phoenix._
-import phoenix.slickflow.{Log, LogRexExp}
+import phoenix.testexample.SlickExample.session
 import slick.basic.DatabaseConfig
 import slick.jdbc.meta.MTable
-import slick.jdbc.{JdbcBackend, JdbcProfile}
+import slick.jdbc.{GetResult, JdbcBackend, JdbcProfile}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -29,100 +31,91 @@ object SlickExample extends App {
   import session.profile.api._
 
 
+//
+//   case class Person(id: String, name: Option[String])
+//
+//   val personsSchema: session.profile.SchemaDescription = TableQuery[Persons].schema
+//
+//    class Persons(tag: Tag) extends Table[Person](tag, Some("MYSCHEMA"), "PERSON") {
+//      def id = column[String]("ID", O.PrimaryKey)
+//
+//      def name = column[Option[String]]("NAME")
+//
+//      def * = (id, name) <> (Person.tupled, Person.unapply)
+//    }
+//    try {
+//      Await.result(db.run(personsSchema.create), Duration.Inf)
+//    } finally db.close
+//
+//
+//
+//    private val value: SimpleDBIO[Boolean] = SimpleDBIO[Boolean](_.connection.getAutoCommit)
+//    case class User(id: Int, name: String)
+//    val users = (1 to 42).map(i => User(i, s"Name$i"))
+//
+//    val done: Future[Done] =
+//      Source(users)
+//        .runWith(
+//          // add an optional first argument to specify the parallism factor (Int)
+//          Slick.sink(user => sqlu"UPSERT INTO R.JAVATEST VALUES(${user.id}, ${user.name})".transactionally)
+//        )
+//
+//    done.onComplete {
+//      case a=>
+//        val aa=a
+//        session.profile.backend.synchronized()
+//        session.close()
+//        system.terminate()
+//    }
 
-  val line = "ip1 - - [24/2/2011:04:06:01 -0400] \"GET /~strabal/grease/photo9/927-3.jpg HTTP/1.1\" 200 40028 \"-\" \"Mozilla/5.0 (compatible; YandexImages/3.0; +http://yandex.com/bots)\""
+  case class Request(ip: Int, time: Timestamp, request: Option[String], browser: Option[String], operationSystem: Option[String])
 
-  val log: Log = LogRexExp.parseApacheLog(line)
-  val maybeTimestamp: Option[Timestamp] = getTimestamp(log.dataTime)
-  val address: String = log.idAddress
-  val time: Long = maybeTimestamp.get.getTime
-  val request: String = log.request
-  val agent = new UserAgent(log.browser)
-  val browserName: String = agent.getBrowser.getName
-  val operatioSystemName: String = agent.getOperatingSystem.getName
+//  class Requests(tag: Tag) extends Table[Request](tag, Some("PROXY"), "REQUEST") {
+//
+//    def ip = column[Int]("IP")
+//
+//    def time = column[Timestamp]("TIME")
+//
+//    def request = column[Option[String]]("REQUEST")
+//
+//    def browser = column[Option[String]]("BROWSER")
+//
+//    def operationSystem = column[Option[String]]("OPERATION_SYSTEM")
+//
+//    def pk = primaryKey("pk", (ip, time))
+//
+//    def * = (ip, time, request, browser, operationSystem) <> (Request.tupled, Request.unapply)
+//  }
+//
+//  val doneR: Future[Done] =
+//    Slick
+//      .source(TableQuery[Requests].result)
+//      .log("user")
+//      .runWith(Sink.foreach(re=>println(re)))
+//
+//  doneR.onComplete {
+//    case _ =>
+//      session.close()
+//      system.terminate()
+//  }
 
-  case class Request(ip:String,time:Timestamp,request:Option[String],browser:Option[String],operationSystem:Option[String])
+   implicit val value = GetResult(r=>Request(r.nextInt(),r.nextTimestamp(),Option(r.nextString()),Option(r.nextString()),Option(r.nextString())))
 
 
-  class Requests(tag:Tag) extends Table[Request](tag, Some("MYSCHEMA"),"person"){
+  val done: Future[Done] ={
+    Slick
+      .source(sql"SELECT * FROM PROXY.REQUEST WHERE IP=1".as[Request])
+      .runWith(Sink.foreach(
+        r=>
+          println(r)))
+      }
 
-    def ip=column[String]("ip")
-    def time=column[Timestamp]("timestamp",O.SqlType("ROW_TIMESTAMP"))
-    def request=column[Option[String]]("request")
-    def browser=column[Option[String]]("browser")
-    def operationSystem=column[Option[String]]("operation_system")
-    def * = (ip, time,request,browser,operationSystem) <> (Request.tupled, Request.unapply)
-    def pk = primaryKey("pk_ip_time", (ip, time))
+
+  done.onComplete {
+    case _ =>
+      session.close()
+      system.terminate()
   }
 
 
-
-  case class Person(id: String, name: Option[String])
-
-  class Persons(tag: Tag) extends Table[Person](tag,Some("MYSCHEMA"), "person") {
-    def id = column[String]("ID", O.PrimaryKey)
-
-    def name = column[Option[String]]("NAME")
-
-    def * = (id, name) <> (Person.tupled, Person.unapply)
   }
-
-  class Users(tag: Tag) extends Table[(String, Option[String])](tag, Some("MYSCHEMA"),"ALPAKKA") {
-    def id = column[String]("ID", O.PrimaryKey)
-
-    def name = column[Option[String]]("NAME")
-
-    def * = (id, name)
-  }
-
-  private val users: TableQuery[Users] = TableQuery[Users]
-  val usersSchema = TableQuery[Users].schema
-
-  private val persons: TableQuery[Persons] = TableQuery[Persons]
-  val personsSchema = TableQuery[Persons].schema
-
-  private val eventualTables: Future[Vector[MTable]] = db.run(MTable.getTables)
-eventualTables.map(v=>v.foreach(m=>println(m)))
-//  try {
-//        Await.result(db.run(personsSchema.create), Duration.Inf)
-//      } finally db.close
-
-
-
-//  try {
-//    Await.result(db.run(DBIO.seq(
-//      MTable.getTables map (tables => {
-//        if (!tables.exists(_.name.name == persons.baseTableRow.tableName))
-//          personsSchema.create
-//      })
-//    )), Duration.Inf)
-//  } finally db.close
-
-  try {
-    Await.result(db.run(DBIO.seq(
-      MTable.getTables map (tables => {
-        if (!tables.exists(_.name.name == users.baseTableRow.tableName))
-          usersSchema.create
-      })
-    )), Duration.Inf)
-  } finally db.close
-
-
-  //  implicit val getUserResult = GetResult(r => Person(r.nextString(), r.nextString()))
-  //  //  Slick.sink(sql"create table if not exists javatest (mykey integer not null primary key, mycolumn varchar)".as[Person])
-  //
-  //  // Stream the results of a query
-  //  val done: Future[Done] =
-  //    Slick
-  //      .source(sql"select * from person where id='1'".as[Person])
-  //      .log("user")
-  //      .runWith(Sink.foreach(println))
-  //
-  //  done.onComplete {
-  //    case _ =>
-  //      session.close()
-  //      system.terminate()
-  //  }
-
-
-}

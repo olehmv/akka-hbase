@@ -17,14 +17,13 @@ public class PhoenixExample {
         try {
             // Connect to the database
             connection = DriverManager.getConnection("jdbc:phoenix:sandbox-hdp.hortonworks.com:2181:/hbase-unsecure");
-
             // Create a JDBC statement
             statement = connection.createStatement();
 
             // Execute our statements
-            statement.executeUpdate("create table if not exists R.javatest (mykey integer not null primary key, mycolumn varchar)");
+            statement.executeUpdate("create table if not exists javatest (mykey integer not null primary key, mycolumn varchar)");
             statement.executeUpdate("upsert into javatest values (2,'Hello')");
-            statement.executeUpdate("upsert into javatest values (33,'Java Application')");
+            statement.executeUpdate("upsert into proxy.request values (111,'2002-05-30 09:30:10.0')");
             connection.commit();
 
             // Query for table
