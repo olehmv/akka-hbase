@@ -107,7 +107,7 @@ object SlickExample extends App {
       .source(sql"SELECT * FROM PROXY.REQUEST WHERE IP=1".as[Request])
       .runWith(Sink.foreach(
         r=>
-          println(r)))
+          println(r)))////
       }
 
 
